@@ -8,6 +8,23 @@
  * tokens is predictable.
  */
 
+void jsonNameList(char *jsonstr, jsmntok_t *t, int tokcount){
+	// 하나 받아오면 ...
+	// 토큰의 타입 >> String 이고
+	// 토큰의 사이즈 >> 1인것 찾기 >> printf해준다.
+	int i=0;
+	int count=0;
+	while(i<tokcount){
+		if(t[i].type == JSMN_STRING && t[i].size == 1){
+			//printf("[NAME %d] %.*s\n",i,t[i+1].end-t[i+1].start,jsonstr + t[i+1].start);
+			count++;
+			printf("[NAME %d] %.*s\n",count,t[i].end-t[i].start,jsonstr + t[i].start);
+		}
+		i++;
+	}
+
+}
+
 char *readJSONFile(){
 	FILE *f;
 	f=fopen("data.json","r");
@@ -51,7 +68,7 @@ int main() {
 	jsmn_parser p;
 	jsmntok_t t[128]; /* We expect no more than 128 tokens */
 
-	static const char *str;
+	static char *str;
 	str=readJSONFile();
 	//printf("%s",str);
 	//return 0;
@@ -68,6 +85,8 @@ int main() {
 		printf("Object expected\n");
 		return 1;
 	}
+
+  jsonNameList(str,t,r);
 
 	/* Loop over all keys of the root object */
 	for (i = 1; i < r; i++) {
@@ -98,7 +117,7 @@ int main() {
 			}
 			i += t[i+1].size + 1;
 		}
-		
+
 	}
 	return EXIT_SUCCESS;
 }
