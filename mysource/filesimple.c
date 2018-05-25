@@ -8,6 +8,14 @@
  * tokens is predictable.
  */
 
+ static int jsoneq(const char *json, jsmntok_t tok, jsmntok_t s) {
+ 	if (tok.type == JSMN_STRING && s.end - s.start == tok.end - tok.start &&
+ 			strncmp(json + tok.start, json + s.start , tok.end - tok.start) == 0) {
+ 		return 0;
+ 	}
+ 	return -1;
+ }
+
 void jsonNameList(char *jsonstr, jsmntok_t *t, int tokcount,int *nameTokIndex){
 
 	int i=0;
@@ -34,15 +42,41 @@ void printNameList(char *jsonstr, jsmntok_t *t, int *nameTokIndex){
 
 	}
 }
+/*
+void printFirstValueList(char *jsonstr, jsmntok_t *t, int *nameTokIndex){
 
-void printNameValueList(char *jsonstr, jsmntok_t *t, int *nameTokIndex){
+	int i=0;
+	int count=0;
+	int countOfOneArray=0;
+
+	while(i<tokcount){
+		if(t[i].type == JSMN_STRING && t[i].size == 1){
+			countOfOneArray++;
+		}
+		i++;
+		if(t[i].type == JSMN_OBJECT) break;
+	}
+
+
+ //name Tokindex가 총 몇갠지 알 수 있다..?응?...근데 ㄱ그건좀아닌듯.
+
+
+}
+*/
+void printFirstValueList(char *jsonstr, jsmntok_t *t, int *nameTokIndex){
  int count=0;
+ jsmntok_t first;
+ char firstString[20];
  printf("%s\n","**** Object List ****");
 
+ //name Tokindex가 총 몇갠지 알 수 있다..?응?...근데 ㄱ그건좀아닌듯.
+
+ first = t[nameTokIndex[1]];
  while(1){
 	 count++;
 	 if(nameTokIndex[count]==0) break;
-	 printf("[NAME %d] %.*s\n",count,t[nameTokIndex[count]].end-t[nameTokIndex[count]].start,jsonstr + t[nameTokIndex[count]].start);
+	 if(jsoneq(jsonstr,t[nameTokIndex[count]],first)==0)
+	 printf("[NAME %d] %.*s\n",count,t[nameTokIndex[count]+1].end-t[nameTokIndex[count]+1].start,jsonstr + t[nameTokIndex[count]+1].start);
 
  }
 }
@@ -85,18 +119,6 @@ char *readJSONFile(){
 	return str;
 }
 
-static const char *JSON_STRING =
-	"{\"user\": \"johndoe\", \"admin\": false, \"uid\": 1000,\n  "
-	"\"groups\": [\"users\", \"wheel\", \"audio\", \"video\"]}";
-
-static int jsoneq(const char *json, jsmntok_t *tok, const char *s) {
-	if (tok->type == JSMN_STRING && (int) strlen(s) == tok->end - tok->start &&
-			strncmp(json + tok->start, s, tok->end - tok->start) == 0) {
-		return 0;
-	}
-	return -1;
-}
-
 int main() {
 	int i;
 	int r;
@@ -122,9 +144,11 @@ int main() {
 		return 1;
 	}
 
+
   jsonNameList(str,t,r,nameTokIndex);
 	//selectNameList(str, t,nameTokIndex);
-	printNameList(str,t,nameTokIndex);
+	//printNameList(str,t,nameTokIndex);
+	printFirstValueList(str,t,nameTokIndex);
 	return 0;
 
 	/* Loop over all keys of the root object */
