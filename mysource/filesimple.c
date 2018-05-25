@@ -35,6 +35,18 @@ void printNameList(char *jsonstr, jsmntok_t *t, int *nameTokIndex){
 	}
 }
 
+void printNameValueList(char *jsonstr, jsmntok_t *t, int *nameTokIndex){
+ int count=0;
+ printf("%s\n","**** Object List ****");
+
+ while(1){
+	 count++;
+	 if(nameTokIndex[count]==0) break;
+	 printf("[NAME %d] %.*s\n",count,t[nameTokIndex[count]].end-t[nameTokIndex[count]].start,jsonstr + t[nameTokIndex[count]].start);
+
+ }
+}
+
 void selectNameList(char *jsonstr, jsmntok_t *t, int *nameTokIndex){
 
 	int index;
@@ -105,7 +117,7 @@ int main() {
 	}
 
 	/* Assume the top-level element is an object */
-	if (r < 1 || t[0].type != JSMN_OBJECT) {
+	if (r < 1) {
 		printf("Object expected\n");
 		return 1;
 	}
