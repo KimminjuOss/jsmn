@@ -111,8 +111,8 @@ int main() {
 	}
 
   jsonNameList(str,t,r,nameTokIndex);
-	selectNameList(str, t,nameTokIndex);
-	//printNameList(str,t,nameTokIndex);
+	//selectNameList(str, t,nameTokIndex);
+	printNameList(str,t,nameTokIndex);
 	return 0;
 
 	/* Loop over all keys of the root object */
