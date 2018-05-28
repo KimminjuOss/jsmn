@@ -42,29 +42,10 @@ void printNameList(char *jsonstr, jsmntok_t *t, int *nameTokIndex){
 
 	}
 }
-/*
-void printFirstValueList(char *jsonstr, jsmntok_t *t, int *nameTokIndex){
 
-	int i=0;
-	int count=0;
-	int countOfOneArray=0;
-
-	while(i<tokcount){
-		if(t[i].type == JSMN_STRING && t[i].size == 1){
-			countOfOneArray++;
-		}
-		i++;
-		if(t[i].type == JSMN_OBJECT) break;
-	}
-
-
- //name Tokindex가 총 몇갠지 알 수 있다..?응?...근데 ㄱ그건좀아닌듯.
-
-
-}
-*/
-void printFirstValueList(char *jsonstr, jsmntok_t *t, int *nameTokIndex){
+int printFirstValueList(char *jsonstr, jsmntok_t *t, int *nameTokIndex){
  int count=0;
+ int i=0;
  jsmntok_t first;
  char firstString[20];
  printf("%s\n","**** Object List ****");
@@ -75,11 +56,58 @@ void printFirstValueList(char *jsonstr, jsmntok_t *t, int *nameTokIndex){
  while(1){
 	 count++;
 	 if(nameTokIndex[count]==0) break;
-	 if(jsoneq(jsonstr,t[nameTokIndex[count]],first)==0)
-	 printf("[NAME %d] %.*s\n",count,t[nameTokIndex[count]+1].end-t[nameTokIndex[count]+1].start,jsonstr + t[nameTokIndex[count]+1].start);
-
- }
+	 if(jsoneq(jsonstr,t[nameTokIndex[count]],first)==0){
+		 i++;
+	 printf("[NAME %d] %.*s\n",i,t[nameTokIndex[count]+1].end-t[nameTokIndex[count]+1].start,jsonstr + t[nameTokIndex[count]+1].start);
 }
+ }
+  return i;
+}
+
+void printAllInfoOfObject(char *jsonstr, jsmntok_t *t, int *nameTokIndex){
+
+	int countObject;
+	int kind;
+	int numbefOfObjectMember;
+	int start;
+	int end;
+  int i=0;
+  int count=0;
+
+  while(1){
+    if(nameTokIndex[count]==0) break;
+    count++;
+  }
+
+	countObject = printFirstValueList(jsonstr,t,nameTokIndex);
+	printf("1\n");
+	numbefOfObjectMember = count/countObject;
+
+	while(1){
+		printf("원하는 번호 입력 (Exit :0) : ");
+		scanf("%d",&kind);
+		if(kind==0) break;
+
+		start=numbefOfObjectMember*(kind-1)+1;
+		end=start+numbefOfObjectMember;
+
+		for(i=start ; i<end ; i++){
+
+			if(i==start){
+				printf("%.*s  :  ",t[nameTokIndex[i]].end-t[nameTokIndex[i]].start,jsonstr + t[nameTokIndex[i]].start);
+				printf("%.*s\n",t[nameTokIndex[i]+1].end-t[nameTokIndex[i]+1].start,jsonstr + t[nameTokIndex[i]+1].start);
+			}
+
+      else{
+			printf("		[%.*s]",t[nameTokIndex[i]].end-t[nameTokIndex[i]].start,jsonstr + t[nameTokIndex[i]].start);
+			printf("  %.*s\n",t[nameTokIndex[i]+1].end-t[nameTokIndex[i]+1].start,jsonstr + t[nameTokIndex[i]+1].start);
+      }
+		}
+	}
+}
+
+
+
 
 void selectNameList(char *jsonstr, jsmntok_t *t, int *nameTokIndex){
 
@@ -122,6 +150,7 @@ char *readJSONFile(){
 int main() {
 	int i;
 	int r;
+	int countObject;
 	jsmn_parser p;
 	jsmntok_t t[128]; /* We expect no more than 128 tokens */
 
@@ -148,7 +177,8 @@ int main() {
   jsonNameList(str,t,r,nameTokIndex);
 	//selectNameList(str, t,nameTokIndex);
 	//printNameList(str,t,nameTokIndex);
-	printFirstValueList(str,t,nameTokIndex);
+	//countObject=printFirstValueList(str,t,nameTokIndex);
+	printAllInfoOfObject(str, t, nameTokIndex);
 	return 0;
 
 	/* Loop over all keys of the root object */
