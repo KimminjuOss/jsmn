@@ -65,6 +65,7 @@ void printFirstValueList(char *jsonstr, jsmntok_t *t, int *nameTokIndex){
 
  //name Tokindex가 총 몇갠지 알 수 있다..?응?...근데 ㄱ그건좀아닌듯.
 
+ // 첫번째 object의 토큰을 저장해 놓는다.
  first = t[nameTokIndex[1]];
  while(1){
 	 count++;
@@ -155,7 +156,7 @@ void printAllInfoOfObject(char *jsonstr, jsmntok_t *t, int *nameTokIndex){
         }
 
         else{
-        printf("		[%.*s]",t[nameTokIndex[i]].end-t[nameTokIndex[i]].start,jsonstr + t[nameTokIndex[i]].start);
+        printf("  [%.*s]",t[nameTokIndex[i]].end-t[nameTokIndex[i]].start,jsonstr + t[nameTokIndex[i]].start);
         printf("  %.*s\n",t[nameTokIndex[i]+1].end-t[nameTokIndex[i]+1].start,jsonstr + t[nameTokIndex[i]+1].start);
         }
       }
@@ -250,9 +251,10 @@ int main() {
 
   jsonNameList(str,t,r,nameTokIndex);
 	//selectNameList(str, t,nameTokIndex);
-	printNameList(str,t,nameTokIndex);
+	//printNameList(str,t,nameTokIndex);
+  //printFirstValueList(str,t,nameTokIndex);
 	//countObject=printFirstValueList(str,t,nameTokIndex);
-	//printAllInfoOfObject(str, t, nameTokIndex);
+	printAllInfoOfObject(str, t, nameTokIndex);
   //printFirstValueListAndSaveIndex(str,t,nameTokIndex,firstObjectIndex);
   //printAllInfoOfObject(str,t,nameTokIndex);
 	return 0;
