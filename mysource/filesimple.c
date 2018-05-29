@@ -17,29 +17,57 @@
  }
 
 void jsonNameList(char *jsonstr, jsmntok_t *t, int tokcount,int *nameTokIndex){
-
 	int i=0;
 	int count=0;
-  int p=0;
+  jsmntok_t p;
 
+ // 첫번째 토큰의 타입이 object이면, 처음 만난 nameList의 parent 인덱스의 token의 parent
+  if(t[0].type==JSMN_ARRAY){
+    while(i<tokcount){
+      if(t[i].type == JSMN_STRING && t[i].size == 1){
+        count++;
+        nameTokIndex[count]=i;
+        p=t[t[i].parent];
+        break;
+      }
+      i++;
+    }
+
+    i++;
+
+    while(i<tokcount){
+      if(t[i].type == JSMN_STRING && t[i].size == 1 && t[t[i].parent].parent ==p.parent){
+        count++;
+        nameTokIndex[count]=i;
+      }
+      i++;
+    }
+  }
+
+// 첫번째 토큰의 타입이 object가 아닌 경우
+else{
 	while(i<tokcount){
 		if(t[i].type == JSMN_STRING && t[i].size == 1){
 			count++;
 			nameTokIndex[count]=i;
-      p=t[i].parent;
+      p=t[i];
       break;
 		}
     i++;
 	}
-  printf("%d\n",p);
+
+  printf("%d\n",p.parent);
+
   i++;
+
   while(i<tokcount){
-		if(t[i].type == JSMN_STRING && t[i].size == 1 && t[i].parent ==p){
+		if(t[i].type == JSMN_STRING && t[i].size == 1 && t[i].parent ==p.parent){
 			count++;
 			nameTokIndex[count]=i;
 		}
 		i++;
 	}
+}
 
 	nameTokIndex[count+1]=0;
 }
@@ -197,7 +225,7 @@ void selectNameList(char *jsonstr, jsmntok_t *t, int *nameTokIndex){
 
 char *readJSONFile(){
 	FILE *f;
-	f=fopen("data2.json","r");
+	f=fopen("data3.json","r");
 	//char strTemp[255];
 	char *str;
 	char oneline[255];
@@ -251,10 +279,10 @@ int main() {
 
   jsonNameList(str,t,r,nameTokIndex);
 	//selectNameList(str, t,nameTokIndex);
-	//printNameList(str,t,nameTokIndex);
+	printNameList(str,t,nameTokIndex);
   //printFirstValueList(str,t,nameTokIndex);
 	//countObject=printFirstValueList(str,t,nameTokIndex);
-	printAllInfoOfObject(str, t, nameTokIndex);
+	//printAllInfoOfObject(str, t, nameTokIndex);
   //printFirstValueListAndSaveIndex(str,t,nameTokIndex,firstObjectIndex);
   //printAllInfoOfObject(str,t,nameTokIndex);
 	return 0;
