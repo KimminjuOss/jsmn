@@ -8,6 +8,14 @@
  * tokens is predictable.
  */
 
+ static int jsoneqForSpecificData(const char *json, jsmntok_t *tok, const char *s) {
+ 	if (tok->type == JSMN_STRING && (int) strlen(s) == tok->end - tok->start &&
+ 			strncmp(json + tok->start, s, tok->end - tok->start) == 0) {
+ 		return 0;
+ 	}
+ 	return -1;
+ }
+
  static int jsoneq(const char *json, jsmntok_t tok, jsmntok_t s) {
  	if (tok.type == JSMN_STRING && s.end - s.start == tok.end - tok.start &&
  			strncmp(json + tok.start, json + s.start , tok.end - tok.start) == 0) {
@@ -65,6 +73,7 @@ else{
   if(t[nameTokIndex[1]+1].type==JSMN_ARRAY){
 
     parentIndex=nameTokIndex[1]+1;
+    // ramen은 nameTokIndex에 들어가면 안되기 때문에 다시 count를 0으로 초기화 해준다.
     count=0;
 
     while(i<tokcount){
@@ -76,7 +85,7 @@ else{
     }
 
   }
-  printf("%d\n",p.parent);
+  //printf("%d\n",p.parent);
   if(t[nameTokIndex[1]+1].type!=JSMN_ARRAY){
    while(i<tokcount){
 		if(t[i].type == JSMN_STRING && t[i].size == 1 && t[i].parent ==p.parent){
@@ -89,6 +98,59 @@ else{
 
 }
 	nameTokIndex[count+1]=0;
+}
+
+void printListOfData(char *jsonstr,jsmntok_t *t,int *nameTokIndex){
+  int widecount=1;
+  int i=0;
+  int kind=0; // 단순 출력을 위한 번호
+
+  int parentIndex;
+  jsmntok_t company;
+  jsmntok_t name;
+  jsmntok_t price;
+  jsmntok_t count;
+
+  printf("************************************************\n");
+  printf("번호    제품명   제조사   가격    개수    \n");
+  printf("************************************************\n");
+
+  while(1){
+    if(nameTokIndex[widecount]==0) break;
+
+    kind++;
+    parentIndex=t[nameTokIndex[widecount]].parent;
+
+    i=widecount;
+
+    //같은 object안에 있을 때까지,
+    while(1){
+      if(t[nameTokIndex[widecount]].parent!=parentIndex){
+
+        printf("%d     %.*s     %.*s     %.*s   %-.*s \n",kind,name.end-name.start,jsonstr+name.start
+      ,company.end-company.start,jsonstr+company.start,price.end-price.start,jsonstr+price.start
+      ,count.end-count.start,jsonstr+count.start);
+        break;
+      }
+
+      if (jsoneqForSpecificData(jsonstr, &t[nameTokIndex[i]], "company") == 0){
+        company = t[nameTokIndex[i]+1];
+      }
+      else if (jsoneqForSpecificData(jsonstr, &t[nameTokIndex[i]], "name") == 0){
+        name = t[nameTokIndex[i]+1];
+      }
+      else if (jsoneqForSpecificData(jsonstr, &t[nameTokIndex[i]], "price") == 0){
+        price = t[nameTokIndex[i]+1];
+      }
+      else if (jsoneqForSpecificData(jsonstr, &t[nameTokIndex[i]], "count") == 0){
+        count = t[nameTokIndex[i]+1];
+      }
+      widecount++;
+      i++;
+
+    }
+
+  }
 }
 
 void printNameList(char *jsonstr, jsmntok_t *t, int *nameTokIndex){
@@ -298,12 +360,13 @@ int main() {
 
   jsonNameList(str,t,r,nameTokIndex);
 	//selectNameList(str, t,nameTokIndex);
-	printNameList(str,t,nameTokIndex);
+	//printNameList(str,t,nameTokIndex);
   //printFirstValueList(str,t,nameTokIndex);
-	//countObject=printFirstValueList(str,t,nameTokIndex);
+  //countObject=printFirstValueList(str,t,nameTokIndex);
 	//printAllInfoOfObject(str, t, nameTokIndex);
   //printFirstValueListAndSaveIndex(str,t,nameTokIndex,firstObjectIndex);
-  //printAllInfoOfObject(str,t,nameTokIndex);
+  printListOfData(str,t,nameTokIndex);
+
 	return 0;
 
 	/* Loop over all keys of the root object */
