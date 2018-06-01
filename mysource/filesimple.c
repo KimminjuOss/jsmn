@@ -19,9 +19,10 @@
 void jsonNameList(char *jsonstr, jsmntok_t *t, int tokcount,int *nameTokIndex){
 	int i=0;
 	int count=0;
+  int parentIndex=0;
   jsmntok_t p;
 
- // 첫번째 토큰의 타입이 object이면, 처음 만난 nameList의 parent 인덱스의 token의 parent
+ // 첫번째 토큰의 타입이 array이면, 처음 만난 nameList의 parent 인덱스의 token의 parent
   if(t[0].type==JSMN_ARRAY){
     while(i<tokcount){
       if(t[i].type == JSMN_STRING && t[i].size == 1){
@@ -44,8 +45,9 @@ void jsonNameList(char *jsonstr, jsmntok_t *t, int tokcount,int *nameTokIndex){
     }
   }
 
-// 첫번째 토큰의 타입이 object가 아닌 경우
+// 첫번째 토큰의 타입이 array가 아닌 경우
 else{
+
 	while(i<tokcount){
 		if(t[i].type == JSMN_STRING && t[i].size == 1){
 			count++;
@@ -55,20 +57,37 @@ else{
 		}
     i++;
 	}
-
-  printf("%d\n",p.parent);
-
+  // break문으로 끝나버리면 i가 하나 증가해주지 않기 때문에 i++를 해준다.
   i++;
 
-  while(i<tokcount){
+  // 첫번째 토큰의 타입이 object 인데, 처음 만난 namelist의 value의 type이 array인경우
+  // 그 value의 index를 parent로 정하고, 다음 만난 토큰의 parent의 parent가 일치할 경우
+  if(t[nameTokIndex[1]+1].type==JSMN_ARRAY){
+
+    parentIndex=nameTokIndex[1]+1;
+    count=0;
+
+    while(i<tokcount){
+      if(t[i].type == JSMN_STRING && t[i].size == 1 && t[t[i].parent].parent ==parentIndex){
+        count++;
+        nameTokIndex[count]=i;
+      }
+      i++;
+    }
+
+  }
+  printf("%d\n",p.parent);
+  if(t[nameTokIndex[1]+1].type!=JSMN_ARRAY){
+   while(i<tokcount){
 		if(t[i].type == JSMN_STRING && t[i].size == 1 && t[i].parent ==p.parent){
 			count++;
 			nameTokIndex[count]=i;
-		}
+		  }
 		i++;
-	}
-}
+ 	  }
+  }
 
+}
 	nameTokIndex[count+1]=0;
 }
 
@@ -225,7 +244,7 @@ void selectNameList(char *jsonstr, jsmntok_t *t, int *nameTokIndex){
 
 char *readJSONFile(){
 	FILE *f;
-	f=fopen("data3.json","r");
+	f=fopen("data4.json","r");
 	//char strTemp[255];
 	char *str;
 	char oneline[255];
