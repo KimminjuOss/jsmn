@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "../jsmn.h"
+#include "../productlist.h"
 
 /*
  * A small example of jsmn parsing when JSON structure is known and number of
@@ -24,81 +24,48 @@
  	return -1;
  }
 
-void jsonNameList(char *jsonstr, jsmntok_t *t, int tokcount,int *nameTokIndex){
-	int i=0;
-	int count=0;
+
+ void jsonNameList(char *jsonstr, jsmntok_t *t, int tokcount,NameTokenInfo *nameTokIndex){
+ 	int i=0;
+ 	int count=0;
   int parentIndex=0;
+  int object=0;
   jsmntok_t p;
 
- // 첫번째 토큰의 타입이 array이면, 처음 만난 nameList의 parent 인덱스의 token의 parent
-  if(t[0].type==JSMN_ARRAY){
-    while(i<tokcount){
-      if(t[i].type == JSMN_STRING && t[i].size == 1){
-        count++;
-        nameTokIndex[count]=i;
-        p=t[t[i].parent];
-        break;
-      }
-      i++;
-    }
+ // 첫번째 토큰의 타입이 array가 아닌 경우
+ 	while(i<tokcount){
+ 		if(t[i].type == JSMN_STRING && t[i].size == 1){
+      count++;
+ 			nameTokIndex[count].tokindex=i;
+      nameTokIndex[count].objectindex=object;
+       p=t[i];
+       break;
+ 		}
+     i++;
+ 	}
+   // break문으로 끝나버리면 i가 하나 증가해주지 않기 때문에 i++를 해준다.
+   i++;
 
-    i++;
+   // 첫번째 토큰의 타입이 object 인데, 처음 만난 namelist의 value의 type이 array인경우
+   // 그 value의 index를 parent로 정하고, 다음 만난 토큰의 parent의 parent가 일치할 경우
+  parentIndex=nameTokIndex[1].tokindex+1;
+     // ramen은 nameTokIndex에 들어가면 안되기 때문에 다시 count를 0으로 초기화 해준다.
+  count=0;
 
-    while(i<tokcount){
-      if(t[i].type == JSMN_STRING && t[i].size == 1 && t[t[i].parent].parent ==p.parent){
-        count++;
-        nameTokIndex[count]=i;
-      }
-      i++;
-    }
+  while(i<tokcount){
+
+    if(t[i].type==JSMN_OBJECT) object++;
+
+       if(t[i].type == JSMN_STRING && t[i].size == 1 && t[t[i].parent].parent ==parentIndex){
+         count++;
+         nameTokIndex[count].tokindex=i;
+         nameTokIndex[count].objectindex=object;
+       }
+       i++;
   }
 
-// 첫번째 토큰의 타입이 array가 아닌 경우
-else{
-
-	while(i<tokcount){
-		if(t[i].type == JSMN_STRING && t[i].size == 1){
-			count++;
-			nameTokIndex[count]=i;
-      p=t[i];
-      break;
-		}
-    i++;
-	}
-  // break문으로 끝나버리면 i가 하나 증가해주지 않기 때문에 i++를 해준다.
-  i++;
-
-  // 첫번째 토큰의 타입이 object 인데, 처음 만난 namelist의 value의 type이 array인경우
-  // 그 value의 index를 parent로 정하고, 다음 만난 토큰의 parent의 parent가 일치할 경우
-  if(t[nameTokIndex[1]+1].type==JSMN_ARRAY){
-
-    parentIndex=nameTokIndex[1]+1;
-    // ramen은 nameTokIndex에 들어가면 안되기 때문에 다시 count를 0으로 초기화 해준다.
-    count=0;
-
-    while(i<tokcount){
-      if(t[i].type == JSMN_STRING && t[i].size == 1 && t[t[i].parent].parent ==parentIndex){
-        count++;
-        nameTokIndex[count]=i;
-      }
-      i++;
-    }
-
-  }
-  //printf("%d\n",p.parent);
-  if(t[nameTokIndex[1]+1].type!=JSMN_ARRAY){
-   while(i<tokcount){
-		if(t[i].type == JSMN_STRING && t[i].size == 1 && t[i].parent ==p.parent){
-			count++;
-			nameTokIndex[count]=i;
-		  }
-		i++;
- 	  }
-  }
-
-}
-	nameTokIndex[count+1]=0;
-}
+ 	nameTokIndex[count+1].tokindex=0;
+ }
 
 void printListOfData(char *jsonstr,jsmntok_t *t,int *nameTokIndex){
   int widecount=1;
@@ -337,7 +304,7 @@ int main() {
 	jsmntok_t t[128]; /* We expect no more than 128 tokens */
 
 	static char *str;
-	int nameTokIndex[100];
+	NameTokenInfo nameTokIndex[100];
   int *firstObjectIndex=NULL;
 
 	str=readJSONFile();
@@ -365,7 +332,7 @@ int main() {
   //countObject=printFirstValueList(str,t,nameTokIndex);
 	//printAllInfoOfObject(str, t, nameTokIndex);
   //printFirstValueListAndSaveIndex(str,t,nameTokIndex,firstObjectIndex);
-  printListOfData(str,t,nameTokIndex);
+  //printListOfData(str,t,nameTokIndex);
 
 	return 0;
 
