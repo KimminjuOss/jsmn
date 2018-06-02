@@ -66,6 +66,20 @@
 
  	nameTokIndex[count+1].tokindex=0;
  }
+}
+
+int getTokIndex(int objectno, char* name,char *jsonstr, NameTokenInfo *nameTokIndex){
+    int i=1;
+
+    while(nameTokIndex[i].tokindex!=0){
+      if(nameTokIndex[i].objectindex==objectno){
+        if(jsoneqForSpecificData(jsonstr, t[nameTokIndex[i]],name)==0)
+        return nameTokIndex[i].tokindex;
+      }
+      i++;
+    }
+
+}
 
 void printListOfData(char *jsonstr,jsmntok_t *t,int *nameTokIndex){
   int widecount=1;
