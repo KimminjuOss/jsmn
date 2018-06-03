@@ -8,7 +8,7 @@
  * tokens is predictable.
  */
 
- static int jsoneqForSpecificData(const char *json, jsmntok_t *tok, const char *s) {
+int jsoneqForSpecificData(const char *json, jsmntok_t *tok, const char *s) {
  	if (tok->type == JSMN_STRING && (int) strlen(s) == tok->end - tok->start &&
  			strncmp(json + tok->start, s, tok->end - tok->start) == 0) {
  		return 0;
@@ -65,73 +65,46 @@
   }
 
  	nameTokIndex[count+1].tokindex=0;
- }
 }
 
-int getTokIndex(int objectno, char* name,char *jsonstr, NameTokenInfo *nameTokIndex){
+
+int getTokIndex(int objectno, char* name,jsmntok_t *t,char *jsonstr, NameTokenInfo *nameTokIndex){
     int i=1;
 
     while(nameTokIndex[i].tokindex!=0){
       if(nameTokIndex[i].objectindex==objectno){
-        if(jsoneqForSpecificData(jsonstr, t[nameTokIndex[i]],name)==0)
+        //jsoneqForSpecificData 에서 받는 것이 포인터 타입임으로 배열은 주소값으로 준다.
+        if(jsoneqForSpecificData(jsonstr, &t[nameTokIndex[i].tokindex],name)==0)
         return nameTokIndex[i].tokindex;
       }
       i++;
     }
 
 }
+void printListOfData(char *jsonstr,jsmntok_t *t,NameTokenInfo *nameTokIndex){
 
-void printListOfData(char *jsonstr,jsmntok_t *t,int *nameTokIndex){
-  int widecount=1;
+  int valueindex;
   int i=0;
-  int kind=0; // 단순 출력을 위한 번호
 
-  int parentIndex;
-  jsmntok_t company;
-  jsmntok_t name;
-  jsmntok_t price;
-  jsmntok_t count;
 
   printf("************************************************\n");
   printf("번호    제품명   제조사   가격    개수    \n");
   printf("************************************************\n");
 
-  while(1){
-    if(nameTokIndex[widecount]==0) break;
+  for(i=1 ; i<=4 ; i++){
+    printf("%d",i);
 
-    kind++;
-    parentIndex=t[nameTokIndex[widecount]].parent;
-
-    i=widecount;
-
-    //같은 object안에 있을 때까지,
-    while(1){
-      if(t[nameTokIndex[widecount]].parent!=parentIndex){
-
-        printf("%d     %.*s     %.*s     %.*s   %-.*s \n",kind,name.end-name.start,jsonstr+name.start
-      ,company.end-company.start,jsonstr+company.start,price.end-price.start,jsonstr+price.start
-      ,count.end-count.start,jsonstr+count.start);
-        break;
-      }
-
-      if (jsoneqForSpecificData(jsonstr, &t[nameTokIndex[i]], "company") == 0){
-        company = t[nameTokIndex[i]+1];
-      }
-      else if (jsoneqForSpecificData(jsonstr, &t[nameTokIndex[i]], "name") == 0){
-        name = t[nameTokIndex[i]+1];
-      }
-      else if (jsoneqForSpecificData(jsonstr, &t[nameTokIndex[i]], "price") == 0){
-        price = t[nameTokIndex[i]+1];
-      }
-      else if (jsoneqForSpecificData(jsonstr, &t[nameTokIndex[i]], "count") == 0){
-        count = t[nameTokIndex[i]+1];
-      }
-      widecount++;
-      i++;
-
-    }
+    valueindex=getTokIndex(i,"name",t,jsonstr,nameTokIndex)+1;
+    printf("       %.*s",t[valueindex].end-t[valueindex].start,jsonstr+t[valueindex].start);
+    valueindex=getTokIndex(i,"company",t,jsonstr,nameTokIndex)+1;
+    printf("    %.*s",t[valueindex].end-t[valueindex].start,jsonstr+t[valueindex].start);
+    valueindex=getTokIndex(i,"price",t,jsonstr,nameTokIndex)+1;
+    printf("    %.*s",t[valueindex].end-t[valueindex].start,jsonstr+t[valueindex].start);
+    valueindex=getTokIndex(i,"count",t,jsonstr,nameTokIndex)+1;
+    printf("     %.*s\n",t[valueindex].end-t[valueindex].start,jsonstr+t[valueindex].start);
 
   }
+
 }
 
 void printNameList(char *jsonstr, jsmntok_t *t, int *nameTokIndex){
@@ -163,8 +136,8 @@ void printFirstValueList(char *jsonstr, jsmntok_t *t, int *nameTokIndex){
 	 if(jsoneq(jsonstr,t[nameTokIndex[count]],first)==0){
 		 i++;
 	 printf("[NAME %d] %.*s\n",i,t[nameTokIndex[count]+1].end-t[nameTokIndex[count]+1].start,jsonstr + t[nameTokIndex[count]+1].start);
-}
-}
+  }
+ }
 }
 
 int* printFirstValueListAndSaveIndex(char *jsonstr, jsmntok_t *t, int *nameTokIndex,int *firstObjectIndex){
@@ -346,7 +319,7 @@ int main() {
   //countObject=printFirstValueList(str,t,nameTokIndex);
 	//printAllInfoOfObject(str, t, nameTokIndex);
   //printFirstValueListAndSaveIndex(str,t,nameTokIndex,firstObjectIndex);
-  //printListOfData(str,t,nameTokIndex);
+  printListOfData(str,t,nameTokIndex);
 
 	return 0;
 
