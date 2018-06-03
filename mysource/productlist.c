@@ -85,10 +85,12 @@ void printListOfData(char *jsonstr,jsmntok_t *t,NameTokenInfo *nameTokIndex){
 
   int valueindex;
   int i=0;
-
+  int price;
+  int count;
+  char *s;
 
   printf("************************************************\n");
-  printf("번호    제품명   제조사   가격    개수    \n");
+  printf("번호    제품명   제조사   가격    개수    총가격    \n");
   printf("************************************************\n");
 
   for(i=1 ; i<=4 ; i++){
@@ -100,8 +102,19 @@ void printListOfData(char *jsonstr,jsmntok_t *t,NameTokenInfo *nameTokIndex){
     printf("    %.*s",t[valueindex].end-t[valueindex].start,jsonstr+t[valueindex].start);
     valueindex=getTokIndex(i,"price",t,jsonstr,nameTokIndex)+1;
     printf("    %.*s",t[valueindex].end-t[valueindex].start,jsonstr+t[valueindex].start);
+
+    s=(char *)malloc(sizeof(char)*(t[valueindex].end-t[valueindex].start));
+    s=jsonstr+t[valueindex].start;
+    count=atoi(s);
+
     valueindex=getTokIndex(i,"count",t,jsonstr,nameTokIndex)+1;
-    printf("     %.*s\n",t[valueindex].end-t[valueindex].start,jsonstr+t[valueindex].start);
+    printf("    %.*s",t[valueindex].end-t[valueindex].start,jsonstr+t[valueindex].start);
+
+    s=(char *)malloc(sizeof(char)*(t[valueindex].end-t[valueindex].start));
+    s=jsonstr+t[valueindex].start;
+    price=atoi(s);
+
+    printf("      %d\n",count*price);
 
   }
 
